@@ -8,7 +8,8 @@ app.use(cors())
 app.use(express.json())
 
 // Detecta ambiente (produção ou local)
-const isProd = !!process.env.DATABASE_URL
+const isProd = process.env.DATABASE_URL && process.env.NODE_ENV === 'production'
+console.log("DATABASE_URL:", process.env.DATABASE_URL)
 
 // Banco de dados (auto)
 const pool = isProd
