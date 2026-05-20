@@ -9,9 +9,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// =========================
 // BANCO DE DADOS
-// =========================
 
 const isProd =
   process.env.DATABASE_URL
@@ -32,15 +30,11 @@ const pool = isProd
       port: 5432
     })
 
-// =========================
 // JWT SECRET
-// =========================
 
 const JWT_SECRET = 'nexus_secret'
 
-// =========================
 // MIDDLEWARE TOKEN
-// =========================
 
 function verificarToken(
   req,
@@ -75,9 +69,7 @@ function verificarToken(
   }
 }
 
-// =========================
 // MIDDLEWARE ADMIN
-// =========================
 
 function verificarAdmin(
   req,
@@ -94,9 +86,7 @@ function verificarAdmin(
   next()
 }
 
-// =========================
 // LISTAR PRODUTOS
-// =========================
 
 app.get('/produtos', async (req, res) => {
   try {
@@ -114,9 +104,7 @@ app.get('/produtos', async (req, res) => {
   }
 })
 
-// =========================
 // CADASTRO
-// =========================
 
 app.post('/register', async (req, res) => {
   try {
@@ -182,9 +170,7 @@ app.post('/register', async (req, res) => {
   }
 })
 
-// =========================
 // LOGIN
-// =========================
 
 app.post('/login', async (req, res) => {
   try {
@@ -246,9 +232,52 @@ app.post('/login', async (req, res) => {
   }
 })
 
-// =========================
+// CRIAR PEDIDO
+
+app.post(
+  '/pedidos',
+  verificarToken,
+  async (req, res) => {
+    try {
+      const {
+        produtos,
+        total
+      } = req.body
+
+      const usuarioId =
+        req.usuario.id
+
+      const pedido =
+        await pool.query(
+          `
+          INSERT INTO pedidos
+          (
+            usuario_id,
+            total
+          )
+          VALUES ($1, $2)
+          RETURNING *
+          `,
+          [usuarioId, total]
+        )
+
+      res.json({
+        mensagem:
+          'Pedido realizado',
+        pedido: pedido.rows[0]
+      })
+    } catch (err) {
+      console.log(err)
+
+      res.status(500).json({
+        erro:
+          'Erro ao salvar pedido'
+      })
+    }
+  }
+)
+
 // ADMIN - ADICIONAR PRODUTO
-// =========================
 
 app.post(
   '/produtos',
@@ -300,9 +329,7 @@ app.post(
   }
 )
 
-// =========================
 // ADMIN - EDITAR PRODUTO
-// =========================
 
 app.put(
   '/produtos/:id',
@@ -356,9 +383,7 @@ app.put(
   }
 )
 
-// =========================
 // ADMIN - DELETAR PRODUTO
-// =========================
 
 app.delete(
   '/produtos/:id',
@@ -391,9 +416,7 @@ app.delete(
   }
 )
 
-// =========================
 // SERVIDOR
-// =========================
 
 const PORT =
   process.env.PORT || 3000
