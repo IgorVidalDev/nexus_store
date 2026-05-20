@@ -144,22 +144,37 @@ function App() {
     setCarrinho(novoCarrinho)
   }
 
-  function finalizarCompra() {
-    if (
-      !numeroCartao ||
-      !nomeCartao ||
-      !cvv
-    ) {
-      alert(
-        'Preencha os dados do pagamento'
-      )
-
-      return
-    }
-
-    const pedidoId = Math.floor(
-      Math.random() * 100000
+async function finalizarCompra() {
+  if (
+    !numeroCartao ||
+    !nomeCartao ||
+    !cvv
+  ) {
+    alert(
+      'Preencha os dados do pagamento'
     )
+
+    return
+  }
+
+  try {
+    const token =
+      localStorage.getItem('token')
+
+    const response = await axios.post(
+      `${API}/pedidos`,
+      {
+        total: totalFinal
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    const pedidoId =
+      response.data.pedido.id
 
     alert(
       `Pagamento aprovado!\nPedido #${pedidoId} realizado com sucesso`
@@ -170,11 +185,18 @@ function App() {
     setNumeroCartao('')
     setNomeCartao('')
     setCvv('')
-  }
+  } catch (error) {
+    console.log(error)
 
-  // =========================
+    alert(
+      'Erro ao finalizar compra'
+    )
+  }
+}
+
+
   // ADMIN - ADICIONAR
-  // =========================
+
 
   async function adicionarProduto() {
     try {
@@ -209,9 +231,8 @@ function App() {
     }
   }
 
-  // =========================
+
   // ADMIN - EDITAR
-  // =========================
 
   function carregarEdicao(produto) {
     setEditandoId(produto.id)
