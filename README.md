@@ -290,3 +290,8 @@ npm run dev
 npm install
 node server.js
 ```
+
+
+
+TABELA PEDIDOS REALIZADOS:
+![PEDIDOS](image.png)
